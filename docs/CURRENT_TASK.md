@@ -5,18 +5,19 @@
 
 ---
 
-## 🎯 وظیفه جاری
+## ✅ Task جاری (انجام شد)
 
-### **عنوان:** اصلاح لود CSS Dashboard با Vite
+### **عنوان:** اصلاح Route Backup در Navigation
 
 **وضعیت:** ✅ انجام شد
 
 **تغییرات اعمال‌شده:**
-- اضافه کردن `@vite(['resources/css/app.css', 'resources/js/app.js'])` به `resources/views/layouts/app.blade.php`
+- در `resources/views/layouts/navigation.blade.php`:
+  - `route('backup.index')` به `route('admin.backup')` تغییر کرد.
 
 **نتیجه:**
-- Dashboard با استایل صحیح نمایش داده می‌شود.
-- خطای `ERR_CONNECTION_RESET` مربوط به `cdn.tailwindcss.com` برطرف شده است.
+- لینک Backup در Navigation به مسیر صحیح `/admin/backup` هدایت می‌شود.
+- Route `backup.index` دیگر در Navigation استفاده نمی‌شود.
 
 ---
 
@@ -25,26 +26,27 @@
 | ماژول | وضعیت | مشکل |
 |-------|-------|------|
 | **Dashboard** | ✅ درست کار می‌کند | - |
-| **Navigation** | ⚠️ نیاز به اصلاح | Route `backup.index` نامعتبر است |
+| **Navigation** | ✅ اصلاح شد | - |
 | **Project** | ✅ درست کار می‌کند | - |
 | **Assignment** | ✅ درست کار می‌کند | - |
 | **Call Log** | ✅ درست کار می‌کند | - |
 | **User Management** | ✅ درست کار می‌کند | - |
-| **Backup** | ✅ درست کار می‌کند | Route Navigation باید اصلاح شود |
+| **Backup** | ✅ درست کار می‌کند | - |
 
 ---
 
 ## 📋 برنامه مرحله بعدی
 
-### **اولویت بعدی (P1): اصلاح مسیر Backup در Navigation**
+### **اولویت بعدی (P2): Refactor مدل Project**
 
 **مشکل:**
-- در `resources/views/layouts/navigation.blade.php` از `route('backup.index')` استفاده شده است.
-- Route جدید `admin.backup` در `routes/web.php` تعریف شده است.
+- فیلدهای تکراری مانند `purchase_status`, `project_level`, `level` در مدل Project وجود دارند.
+- برخی فیلدها در Controller و Model دوبارگی دارند.
 
 **اقدام مورد نیاز:**
-- تغییر `route('backup.index')` به `route('admin.backup')` در `navigation.blade.php`
-- بررسی اینکه لینک فقط برای کاربران Admin نمایش داده شود.
+- بررسی دقیق فیلدهای مدل Project.
+- شناسایی فیلدهای اضافی و تکراری.
+- ارائه پیشنهاد برای Refactor.
 
 ---
 
