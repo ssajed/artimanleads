@@ -37,6 +37,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'role' => 'required|in:admin,sales_manager,sales_expert,marketer',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -45,23 +46,15 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        // به‌روزرسانی اطلاعات اصلی
-        $user->update($request->only(['name', 'email', 'phone', 'role']));
+        // Mass Assignment با fill()
+        $user->fill($request->only(['name', 'email', 'phone', 'role']));
 
-        // اگر رمز عبور جدید وارد شده باشد
+        // تغییر رمز عبور فقط در صورت وارد شدن
         if ($request->filled('password')) {
-            $validator = Validator::make($request->all(), [
-                'password' => 'string|min:8|confirmed',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            $user->update(['password' => Hash::make($request->password)]);
+            $user->password = Hash::make($request->password);
         }
+
+        $user->save();
 
         return redirect()->route('admin.users')
             ->with('success', 'کاربر با موفقیت به‌روزرسانی شد.');
@@ -81,7 +74,8 @@ class UserController extends Controller
                 ->with('error', 'نقش انتخاب شده معتبر نیست.');
         }
 
-        $user->update(['role' => $request->role]);
+        $user->role = $request->role;
+        $user->save();
 
         return redirect()->back()
             ->with('success', 'نقش کاربر با موفقیت تغییر کرد.');

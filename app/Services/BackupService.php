@@ -65,6 +65,8 @@ class BackupService
 
     public function restoreBackup(string $filename): array
     {
+        // جلوگیری از Path Traversal
+        $filename = basename($filename);
         $filePath = $this->backupPath . '/' . $filename;
 
         if (!file_exists($filePath)) {
@@ -74,12 +76,15 @@ class BackupService
             ];
         }
 
-        try {
-            // بررسی امنیتی: فقط فایل‌های با پسوند .sql مجاز هستند
-            if (pathinfo($filename, PATHINFO_EXTENSION) !== 'sql') {
-                throw new \Exception('فایل غیرمجاز است.');
-            }
+        // بررسی امنیتی: فقط فایل‌های با پسوند .sql مجاز هستند
+        if (pathinfo($filename, PATHINFO_EXTENSION) !== 'sql') {
+            return [
+                'success' => false,
+                'error' => 'فایل غیرمجاز است.'
+            ];
+        }
 
+        try {
             $command = $this->buildRestoreCommand($filePath);
             $process = Process::fromShellCommandline($command);
             $process->setTimeout(3600);
@@ -127,7 +132,6 @@ class BackupService
             ];
         }
 
-        // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
         usort($backups, function ($a, $b) {
             return strtotime($b['created_at']) - strtotime($a['created_at']);
         });
@@ -137,6 +141,8 @@ class BackupService
 
     public function deleteBackup(string $filename): array
     {
+        // جلوگیری از Path Traversal
+        $filename = basename($filename);
         $filePath = $this->backupPath . '/' . $filename;
 
         if (!file_exists($filePath)) {

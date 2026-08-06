@@ -97,9 +97,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 });
 
 // ==========================================
-// توجه: مسیرهای تست حذف شدند!
+// حذف مسیرهای تست
 // ==========================================
-// اگر به مسیر تستی نیاز دارید، فقط در محیط development فعال کنید
-// if (app()->environment('local')) {
-//     Route::get('/test', function(){ return 'Test OK'; });
-// }
+// Route::get('/simple-test', ...) // حذف شد
+// Route::get('/simple-view', ...)  // حذف شد
+// Route::get('/dashboard-test', ...) // حذف شد
