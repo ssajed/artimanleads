@@ -53,9 +53,9 @@
                 @endif
                 
                 @if(auth()->user()->role === 'admin')
-                    <a href="{{ route('backup.index') }}" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
-                        💾 بکاپ
-                    </a>
+                    <x-nav-link :href="route('admin.backup')" :active="request()->routeIs('admin.backup')">
+    {{ __('💾 بکاپ') }}
+</x-nav-link>
                 @endif
             </div>
 
