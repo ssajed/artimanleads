@@ -111,7 +111,7 @@
                     <div id="dropdownMenu" class="hidden absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">پروفایل</a>
                         @if(auth()->user()->role === 'admin')
-                            <a href="{{ route('backup.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💾 بکاپ</a>
+                            <a href="{{ route('admin.backup') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💾 بکاپ</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -178,7 +178,7 @@
             @endif
             
             @if(auth()->user()->role === 'admin')
-                <a href="{{ route('backup.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">
+                <a href="{{ route('admin.backup') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">
                     💾 بکاپ
                 </a>
             @endif
