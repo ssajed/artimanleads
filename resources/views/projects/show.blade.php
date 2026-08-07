@@ -424,7 +424,6 @@
                 <div class="space-y-3">
                     <div>
                         <span class="text-gray-500 block mb-1 text-sm">مرحله خرید:</span>
-                        <span class="text-base font-medium">{{ translatePurchaseStage($project->purchase_stage) }}</span>
                     </div>
                     <div>
                         <span class="text-gray-500 block mb-1 text-sm">زمان احتمالی خرید:</span>

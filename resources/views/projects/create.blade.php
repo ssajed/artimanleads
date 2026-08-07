@@ -238,13 +238,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block mb-2 font-medium">وضعیت خرید <span class="text-red-500">*</span></label>
-                    <div class="flex flex-wrap gap-4 p-3 border rounded-2xl @error('purchase_stage') border-red-500 @enderror">
-                        <label><input type="radio" name="purchase_stage" value="no_inquiry" {{ old('purchase_stage') == 'no_inquiry' ? 'checked' : '' }}> بدون استعلام</label>
-                        <label><input type="radio" name="purchase_stage" value="inquiry" {{ old('purchase_stage') == 'inquiry' ? 'checked' : '' }}> استعلام</label>
-                        <label><input type="radio" name="purchase_stage" value="negotiation" {{ old('purchase_stage') == 'negotiation' ? 'checked' : '' }}> مذاکره</label>
-                        <label><input type="radio" name="purchase_stage" value="purchased" {{ old('purchase_stage') == 'purchased' ? 'checked' : '' }}> خرید شده</label>
                     </div>
-                    @error('purchase_stage')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -630,7 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // بررسی وضعیت خرید
-        const purchaseStage = document.querySelector('input[name="purchase_stage"]:checked');
         if (!purchaseStage) {
             hasError = true;
             errorMessages.push('لطفاً وضعیت خرید را انتخاب کنید.');

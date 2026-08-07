@@ -103,7 +103,6 @@
                     <td class="px-6 py-5 text-sm text-gray-700">{{ $project->region ?? '-' }}</td>
                     <td class="px-6 py-5">
                         @php
-                            $level = $project->project_level ?? 'B_followup';
                             $levelMap = [
                                 'A_hot' => ['bg-red-100 text-red-800', '🔥 داغ'],
                                 'B_followup' => ['bg-yellow-100 text-yellow-800', '⏳ پیگیری'],

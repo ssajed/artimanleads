@@ -29,15 +29,12 @@ class ProjectController extends Controller
                 'B' => 'B_followup',
                 'C' => 'C_archive'
             ];
-            $query->where('project_level', $levelMap[$request->level] ?? $request->level);
         }
 
         if ($request->has('user_id') && $request->user_id != '') {
             $query->where('marketer_id', $request->user_id);
         }
 
-        if ($request->has('purchase_stage') && $request->purchase_stage != '') {
-            $query->where('purchase_status', $request->purchase_stage);
         }
 
         if ($request->has('assignment_status') && $request->assignment_status != '') {
@@ -113,7 +110,6 @@ class ProjectController extends Controller
             'current_cooling_brand' => 'required_if:has_cooling_tower,yes|nullable|string',
             'capacity_tr'           => 'required_if:has_cooling_tower,yes|nullable|numeric',
             'cooling_tower_photo'   => 'nullable|image|max:2048',
-            'purchase_stage'        => 'required|in:exclusive,public_tender,limited_tender,inquiry',
             'expected_purchase_date_shamsi' => 'required|regex:/^\d{4}\/\d{2}\/\d{2}$/',
             'competitors'           => 'nullable|string',
             'vendor_list'           => 'nullable|string',
@@ -205,7 +201,6 @@ class ProjectController extends Controller
             'current_cooling_brand' => $validated['current_cooling_brand'] ?? null,
             'capacity_tr'           => $validated['capacity_tr'] ?? null,
             'cooling_tower_photo'   => $coolingTowerPhotoPath,
-            'purchase_status'       => $validated['purchase_stage'],
             'estimated_purchase_date'=> $expectedPurchaseDate,
             'competitors'           => $validated['competitors'] ?? null,
             'vendor_list'           => $validated['vendor_list'] ?? null,
@@ -219,7 +214,6 @@ class ProjectController extends Controller
             'score_not_purchased'   => $validated['score_not_purchased'] ?? 0,
             'score_capacity'        => $validated['score_capacity'] ?? 0,
             'total_score'           => $totalScore,
-            'project_level'         => $dbLevel,
             'project_status'        => 'lead',
             'notes'                 => $validated['notes'] ?? null,
             'user_id'               => auth()->id(),

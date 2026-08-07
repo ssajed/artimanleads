@@ -158,10 +158,6 @@
                 <div>
                     <label class="block mb-2 font-medium">وضعیت خرید</label>
                     <div class="flex flex-wrap gap-4 p-3 border rounded-2xl">
-                        <label><input type="radio" name="purchase_stage" value="no_inquiry" {{ old('purchase_stage', $project->purchase_stage) == 'no_inquiry' ? 'checked' : '' }}> بدون استعلام</label>
-                        <label><input type="radio" name="purchase_stage" value="inquiry" {{ old('purchase_stage', $project->purchase_stage) == 'inquiry' ? 'checked' : '' }}> استعلام</label>
-                        <label><input type="radio" name="purchase_stage" value="negotiation" {{ old('purchase_stage', $project->purchase_stage) == 'negotiation' ? 'checked' : '' }}> مذاکره</label>
-                        <label><input type="radio" name="purchase_stage" value="purchased" {{ old('purchase_stage', $project->purchase_stage) == 'purchased' ? 'checked' : '' }}> خرید شده</label>
                     </div>
                 </div>
                 <div>
