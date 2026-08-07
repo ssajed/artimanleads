@@ -38,3 +38,5 @@ error_log
 /routes/error_log
 /.git.zip
 /php
+# Local server backups - never commit
+/.backups/
