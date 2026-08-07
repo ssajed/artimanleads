@@ -108,7 +108,7 @@
                                 'B_followup' => ['bg-yellow-100 text-yellow-800', '⏳ پیگیری'],
                                 'C_archive' => ['bg-gray-100 text-gray-800', '🗄️ آرشیو']
                             ];
-                            $levelInfo = $levelMap[$level] ?? ['bg-gray-100 text-gray-800', $level];
+                            $levelInfo = $levelMap[$project->level] ?? ['bg-gray-100 text-gray-800', $project->level ?? '-'];
                         @endphp
                         <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full {{ $levelInfo[0] }}">
                             {{ $levelInfo[1] }}

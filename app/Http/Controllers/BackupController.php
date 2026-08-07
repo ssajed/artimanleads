@@ -2,131 +2,102 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Artisan;
+use App\Services\BackupService;
 
 class BackupController extends Controller
 {
-    // نمایش صفحه بکاپ
+    protected BackupService $backupService;
+
+    public function __construct(BackupService $backupService)
+    {
+        $this->backupService = $backupService;
+    }
+
+    /**
+     * نمایش لیست بکاپ‌ها
+     */
     public function index()
     {
-        // فقط مدیر کل دسترسی داشته باشد
-        if (auth()->user()->role !== 'admin') {
-            abort(403, 'شما دسترسی لازم را ندارید.');
-        }
-
-        $backups = [];
-        $files = Storage::disk('local')->files('backups');
-        
-        foreach ($files as $file) {
-            $backups[] = [
-                'name' => basename($file),
-                'size' => Storage::disk('local')->size($file),
-                'date' => Storage::disk('local')->lastModified($file),
-            ];
-        }
-
-        // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
-        usort($backups, function($a, $b) {
-            return $b['date'] - $a['date'];
-        });
+        $backups = $this->backupService->listBackups();
 
         return view('admin.backup', compact('backups'));
     }
 
-    // ایجاد بکاپ جدید
+    /**
+     * ایجاد بکاپ جدید
+     */
     public function create()
     {
-        if (auth()->user()->role !== 'admin') {
-            abort(403, 'شما دسترسی لازم را ندارید.');
+        $result = $this->backupService->createBackup();
+
+        if (!$result['success']) {
+            return redirect()
+                ->route('backup.index')
+                ->with('error', 'خطا در ایجاد بکاپ: ' . $result['error']);
         }
 
-        $filename = 'backup_' . date('Y-m-d_H-i-s') . '.sql';
-        $path = storage_path('app/backups/' . $filename);
-
-        // ایجاد پوشه بکاپ اگر وجود ندارد
-        if (!is_dir(storage_path('app/backups'))) {
-            mkdir(storage_path('app/backups'), 0755, true);
-        }
-
-        // گرفتن بکاپ از دیتابیس
-        $command = sprintf(
-            'mysqldump -u %s -p%s %s > %s',
-            env('DB_USERNAME'),
-            env('DB_PASSWORD'),
-            env('DB_DATABASE'),
-            $path
-        );
-
-        exec($command);
-
-        return redirect()->route('backup.index')
-                         ->with('success', 'بکاپ با موفقیت گرفته شد.');
+        return redirect()
+            ->route('backup.index')
+            ->with('success', 'بکاپ با موفقیت ایجاد شد: ' . $result['filename']);
     }
 
-    // دانلود فایل بکاپ
-    public function download($filename)
+    /**
+     * دانلود بکاپ
+     */
+    public function download(string $filename)
     {
-        if (auth()->user()->role !== 'admin') {
-            abort(403, 'شما دسترسی لازم را ندارید.');
+        $filename = basename($filename);
+
+        if (pathinfo($filename, PATHINFO_EXTENSION) !== 'sql') {
+            abort(404, 'فایل بکاپ معتبر نیست.');
         }
 
         $path = storage_path('app/backups/' . $filename);
-        
+
         if (!file_exists($path)) {
-            return redirect()->route('backup.index')
-                             ->with('error', 'فایل بکاپ یافت نشد.');
+            abort(404, 'فایل بکاپ یافت نشد.');
         }
 
         return response()->download($path);
     }
 
-    // حذف فایل بکاپ
-    public function delete($filename)
+    /**
+     * بازیابی بکاپ
+     */
+    public function restore(string $filename)
     {
-        if (auth()->user()->role !== 'admin') {
-            abort(403, 'شما دسترسی لازم را ندارید.');
+        $filename = basename($filename);
+
+        $result = $this->backupService->restoreBackup($filename);
+
+        if (!$result['success']) {
+            return redirect()
+                ->route('backup.index')
+                ->with('error', 'خطا در بازیابی بکاپ: ' . $result['error']);
         }
 
-        $path = storage_path('app/backups/' . $filename);
-        
-        if (file_exists($path)) {
-            unlink($path);
-            return redirect()->route('backup.index')
-                             ->with('success', 'فایل بکاپ با موفقیت حذف شد.');
-        }
-
-        return redirect()->route('backup.index')
-                         ->with('error', 'فایل بکاپ یافت نشد.');
+        return redirect()
+            ->route('backup.index')
+            ->with('success', 'دیتابیس با موفقیت از بکاپ بازیابی شد.');
     }
 
-    // بازیابی از بکاپ
-    public function restore($filename)
+    /**
+     * حذف بکاپ
+     */
+    public function delete(string $filename)
     {
-        if (auth()->user()->role !== 'admin') {
-            abort(403, 'شما دسترسی لازم را ندارید.');
+        $filename = basename($filename);
+
+        $result = $this->backupService->deleteBackup($filename);
+
+        if (!$result['success']) {
+            return redirect()
+                ->route('backup.index')
+                ->with('error', 'خطا در حذف بکاپ: ' . $result['error']);
         }
 
-        $path = storage_path('app/backups/' . $filename);
-        
-        if (!file_exists($path)) {
-            return redirect()->route('backup.index')
-                             ->with('error', 'فایل بکاپ یافت نشد.');
-        }
-
-        // بازیابی دیتابیس
-        $command = sprintf(
-            'mysql -u %s -p%s %s < %s',
-            env('DB_USERNAME'),
-            env('DB_PASSWORD'),
-            env('DB_DATABASE'),
-            $path
-        );
-
-        exec($command);
-
-        return redirect()->route('backup.index')
-                         ->with('success', 'دیتابیس با موفقیت بازیابی شد.');
+        return redirect()
+            ->route('backup.index')
+            ->with('success', 'فایل بکاپ با موفقیت حذف شد.');
     }
 }

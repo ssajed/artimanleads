@@ -56,6 +56,11 @@ class Project extends Model
         return $this->hasMany(Assignment::class);
     }
 
+    public function latestAssignment()
+    {
+        return $this->hasOne(Assignment::class)->latestOfMany();
+    }
+
     public function callLogs()
     {
         return $this->hasMany(CallLog::class);

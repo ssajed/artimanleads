@@ -35,7 +35,6 @@ class ProjectController extends Controller
             $query->where('marketer_id', $request->user_id);
         }
 
-        }
 
         if ($request->has('assignment_status') && $request->assignment_status != '') {
             $query->whereHas('latestAssignment', function($q) use ($request) {

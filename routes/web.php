@@ -9,7 +9,6 @@ use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\BackupController as AdminBackupController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -89,14 +88,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.update-role');
     
     // ===== مدیریت Backup =====
-    Route::get('/backup', [AdminBackupController::class, 'index'])->name('admin.backup');
-    Route::post('/backup/create', [AdminBackupController::class, 'create'])->name('admin.backup.create');
-    Route::get('/backup/download/{filename}', [AdminBackupController::class, 'download'])->name('admin.backup.download');
-    Route::delete('/backup/{filename}', [AdminBackupController::class, 'destroy'])->name('admin.backup.destroy');
-    Route::post('/backup/restore', [AdminBackupController::class, 'restore'])->name('admin.backup.restore');
+    Route::get("/backup", [BackupController::class, "index"])->name("backup.index");
+    Route::post("/backup/create", [BackupController::class, "create"])->name("backup.create");
+    Route::get("/backup/download/{filename}", [BackupController::class, "download"])->name("backup.download");
+    Route::post("/backup/restore/{filename}", [BackupController::class, "restore"])->name("backup.restore");
+    Route::delete("/backup/{filename}", [BackupController::class, "delete"])->name("backup.delete");
 });
 
-// ==========================================
+ // ==========================================
+ // حذف مسیرهای تست
+ // ==========================================
 // حذف مسیرهای تست
 // ==========================================
 // Route::get('/simple-test', ...) // حذف شد
