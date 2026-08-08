@@ -233,15 +233,28 @@
 
         <!-- بخش ۴: وضعیت خرید -->
         <div class="mb-12">
+        <!-- بخش ۴: وضعیت خرید -->
+        <div class="mb-12">
             <h2 class="text-2xl font-bold text-gray-800 border-b-4 border-green-500 pb-3 mb-6">وضعیت خرید</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block mb-2 font-medium">وضعیت خرید <span class="text-red-500">*</span></label>
-                    </div>
+                    <label class="block mb-2 font-medium">
+                        وضعیت خرید <span class="text-red-500">*</span>
+                    </label>
+
+                    <select name="purchase_status" class="w-full border rounded-2xl px-4 py-3 @error('purchase_status') border-red-500 @enderror">
+                        <option value="">انتخاب کنید</option>
+                        <option value="not_purchased" {{ old('purchase_status') == 'not_purchased' ? 'selected' : '' }}>هنوز خرید نکرده</option>
+                        <option value="in_progress" {{ old('purchase_status') == 'in_progress' ? 'selected' : '' }}>در حال بررسی / مذاکره</option>
+                        <option value="purchased" {{ old('purchase_status') == 'purchased' ? 'selected' : '' }}>خرید انجام شده</option>
+                    </select>
+
+                    @error('purchase_status')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+
                 <div>
                     <label class="block mb-2 font-medium">زمان احتمالی خرید <span class="text-red-500">*</span></label>
                     <input type="text" id="expected_purchase_date_display" value="{{ old('expected_purchase_date_shamsi') }}" onclick="showDateModal2()" readonly class="w-full border rounded-2xl px-4 py-3 cursor-pointer bg-gray-50 @error('expected_purchase_date') border-red-500 @enderror">
