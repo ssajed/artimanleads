@@ -40,3 +40,7 @@ error_log
 /php
 # Local server backups - never commit
 /.backups/
+
+# Local test/backups
+/test/
+*.backup-logout-fix
