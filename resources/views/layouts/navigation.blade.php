@@ -53,9 +53,13 @@
                 @endif
                 
                 @if(auth()->user()->role === 'admin')
-                    <x-nav-link :href="route('backup.index')" :active="request()->routeIs('backup.*')">
-    {{ __('💾 بکاپ') }}
-</x-nav-link>
+                    <a href="{{ route('backup.index') }}" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('backup.*') ? 'text-green-600 font-bold' : '' }}">
+                        💾 بکاپ
+                    </a>
+                    {{-- ✅ لینک جدید مدیریت کاربران --}}
+                    <a href="{{ route('admin.users') }}" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users*') ? 'text-green-600 font-bold' : '' }}">
+                        👥 مدیریت کاربران
+                    </a>
                 @endif
             </div>
 
@@ -112,6 +116,7 @@
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">پروفایل</a>
                         @if(auth()->user()->role === 'admin')
                             <a href="{{ route('backup.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">💾 بکاپ</a>
+                            <a href="{{ route('admin.users') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👥 مدیریت کاربران</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -180,6 +185,10 @@
             @if(auth()->user()->role === 'admin')
                 <a href="{{ route('backup.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">
                     💾 بکاپ
+                </a>
+                {{-- ✅ لینک جدید مدیریت کاربران در موبایل --}}
+                <a href="{{ route('admin.users') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">
+                    👥 مدیریت کاربران
                 </a>
             @endif
             

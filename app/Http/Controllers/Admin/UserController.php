@@ -27,39 +27,41 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    /**
+        /**
      * به‌روزرسانی کاربر
      */
-    public function update(Request $request, User $user)
+         public function update(Request $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'mobile' => 'nullable|string|max:20|unique:users,mobile,' . $user->id,
+            'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,sales_manager,sales_expert,marketer',
+            'is_active' => 'required|in:0,1', // محدود کردن به فقط ۰ یا ۱
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $data = [
+            'name' => $validated['name'],
+            'mobile' => $validated['mobile'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'is_active' => (int)$validated['is_active'], // تبدیل قطعی به عدد
+        ];
 
-        // Mass Assignment با fill()
-        $user->fill($request->only(['name', 'email', 'phone', 'role']));
-
-        // تغییر رمز عبور فقط در صورت وارد شدن
         if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
+            $data['password'] = Hash::make($validated['password']);
         }
 
-        $user->save();
+        $user->update($data);
 
         return redirect()->route('admin.users')
-            ->with('success', 'کاربر با موفقیت به‌روزرسانی شد.');
+                         ->with('success', 'اطلاعات کاربر با موفقیت به‌روزرسانی شد.');
     }
-
+	
+	
+	
+	
     /**
      * تغییر نقش کاربر
      */
