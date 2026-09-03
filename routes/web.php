@@ -49,7 +49,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // ===== مدیریت پروژه‌ها =====
+    // ✅ اول روت‌های سفارشی (قبل از resource)
+    Route::get('/projects/assigned-to-me', [ProjectController::class, 'assignedToMe'])->name('projects.assigned-to-me');
+    
+    // ✅ بعد روت resource
     Route::resource('projects', ProjectController::class);
+    
     Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
     Route::patch('/projects/{project}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     
@@ -94,12 +99,3 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post("/backup/restore/{filename}", [BackupController::class, "restore"])->name("backup.restore");
     Route::delete("/backup/{filename}", [BackupController::class, "delete"])->name("backup.delete");
 });
-
- // ==========================================
- // حذف مسیرهای تست
- // ==========================================
-// حذف مسیرهای تست
-// ==========================================
-// Route::get('/simple-test', ...) // حذف شد
-// Route::get('/simple-view', ...)  // حذف شد
-// Route::get('/dashboard-test', ...) // حذف شد

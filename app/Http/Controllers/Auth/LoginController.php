@@ -35,10 +35,17 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    protected function credentials(Request $request)
+       protected function credentials(Request $request)
     {
         $login = $request->get('email');
+        
+        // تشخیص میده کاربر ایمیل زده یا موبایل
         $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'mobile';
+
+        // اگر ایمیل بود، حتماً به حروف کوچک تبدیل میشه تا خطا نده
+        if ($field === 'email') {
+            $login = strtolower($login);
+        }
 
         return [
             $field => $login,
