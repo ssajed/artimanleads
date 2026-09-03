@@ -29,15 +29,15 @@ class DashboardController extends Controller
             if ($user->role === 'admin' || $user->role === 'sales_manager') {
                 // مدیر کل و مدیر فروش: همه آمارها
                 $allLeadsCount = Project::count();
-                $wonLeadsCount = Project::where('project_level', 'A_hot')->count();
-                $levelBLeadsCount = Project::where('project_level', 'B_followup')->count();
-                $levelCLeadsCount = Project::where('project_level', 'C_archive')->count();
+                $wonLeadsCount = Project::where('level', 'A')->count();
+                $levelBLeadsCount = Project::where('level', 'B')->count();
+                $levelCLeadsCount = Project::where('level', 'C')->count();
 
                 // آمار هر بازاریاب
                 $marketers = User::where('role', 'marketer')->get();
                 foreach ($marketers as $marketer) {
                     $leads = Project::where('marketer_id', $marketer->id)->count();
-                    $won = Project::where('marketer_id', $marketer->id)->where('project_level', 'A_hot')->count();
+                    $won = Project::where('marketer_id', $marketer->id)->where('level', 'A')->count();
                     $marketerStats[] = [
                         'name' => $marketer->full_name ?: $marketer->name,
                         'leads' => $leads,
@@ -59,12 +59,12 @@ class DashboardController extends Controller
             } else {
                 // کارشناس فروش و بازاریاب: فقط آمار شخصی
                 $myLeadsCount = Project::where('marketer_id', $user->id)->count();
-                $myWonCount = Project::where('marketer_id', $user->id)->where('project_level', 'A_hot')->count();
+                $myWonCount = Project::where('marketer_id', $user->id)->where('level', 'A')->count();
 
                 $allLeadsCount = $myLeadsCount;
                 $wonLeadsCount = $myWonCount;
-                $levelBLeadsCount = Project::where('marketer_id', $user->id)->where('project_level', 'B_followup')->count();
-                $levelCLeadsCount = Project::where('marketer_id', $user->id)->where('project_level', 'C_archive')->count();
+                $levelBLeadsCount = Project::where('marketer_id', $user->id)->where('level', 'B')->count();
+                $levelCLeadsCount = Project::where('marketer_id', $user->id)->where('level', 'C')->count();
 
                 $stats = [
                     'my_leads' => $myLeadsCount,
