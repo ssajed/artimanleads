@@ -15,7 +15,7 @@
     
     if (!function_exists('translateLevel')) {
         function translateLevel($level) {
-            $map = ['A' => '🔥 داغ', 'B' => '⏳ پیگیری', 'C' => '🗄️ آرشیو'];
+            $map = ['A' => ' داغ', 'B' => ' پیگیری', 'C' => '️ آرشیو'];
             return $map[$level] ?? $level;
         }
     }
@@ -44,14 +44,14 @@
     if (!function_exists('getStatusColor')) {
         function getStatusColor($status) {
             $map = [
-                'lead' => 'bg-blue-100 text-blue-800',
-                'assigned' => 'bg-purple-100 text-purple-800',
-                'negotiation' => 'bg-yellow-100 text-yellow-800',
-                'sold' => 'bg-green-100 text-green-800',
-                'archived' => 'bg-gray-100 text-gray-800',
-                'lost' => 'bg-red-100 text-red-800'
+                'lead' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+                'assigned' => 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+                'negotiation' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+                'sold' => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+                'archived' => 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300',
+                'lost' => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
             ];
-            return $map[$status] ?? 'bg-gray-100 text-gray-800';
+            return $map[$status] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
         }
     }
 @endphp
@@ -59,63 +59,59 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-6">
-    <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
-        <h1 class="text-3xl font-bold text-gray-800">جزئیات پروژه: {{ $project->title }}</h1>
+<div class="max-w-7xl mx-auto p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white">جزئیات پروژه: {{ $project->title }}</h1>
         <div class="flex gap-3 flex-wrap">
             <a href="{{ route('projects.edit', $project) }}" 
-               class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-2xl font-medium transition">
+               class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-2xl font-medium transition shadow-md">
                 ✏️ ویرایش
             </a>
             <a href="{{ route('projects.index') }}" 
-               class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-2xl font-medium transition">
+               class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-2xl font-medium transition shadow-md">
                 🔙 بازگشت
             </a>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-5 py-4 rounded-2xl mb-6">
+        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-300 px-5 py-4 rounded-2xl mb-6 transition-colors">
             {{ session('success') }}
         </div>
     @endif
 
     @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-5 py-4 rounded-2xl mb-6">
+        <div class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-5 py-4 rounded-2xl mb-6 transition-colors">
             {{ session('error') }}
         </div>
     @endif
 
     <div class="space-y-6">
 
-        <!-- ===== بخش تایید ارجاع برای کارشناس (فقط یک بار) ===== -->
+        <!-- ===== بخش تایید ارجاع برای کارشناس ===== -->
         @if(auth()->user()->role === 'sales_expert')
             @php
                 $pendingAssignment = $project->assignments()->where('assigned_to', auth()->id())->where('status', 'pending')->first();
             @endphp
             @if($pendingAssignment)
-                <div class="bg-yellow-50 border border-yellow-400 rounded-2xl p-4 mb-4">
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-800 rounded-2xl p-4 mb-4 transition-colors">
                     <div class="flex items-start gap-3">
-                        <span class="text-2xl">🔔</span>
+                        <span class="text-2xl"></span>
                         <div class="flex-1">
-                            <p class="text-yellow-800 font-bold">یک ارجاع جدید برای شما وجود دارد!</p>
-                            <p class="text-yellow-700 text-sm mt-1">لید "{{ $project->title }}" توسط {{ $pendingAssignment->assignedBy->name }} به شما ارجاع داده شده است.</p>
+                            <p class="text-yellow-800 dark:text-yellow-300 font-bold">یک ارجاع جدید برای شما وجود دارد!</p>
+                            <p class="text-yellow-700 dark:text-yellow-400 text-sm mt-1">لید "{{ $project->title }}" توسط {{ $pendingAssignment->assignedBy->name }} به شما ارجاع داده شده است.</p>
                             <div class="flex gap-2 mt-3">
                                 <form action="{{ route('assignments.update-status', $pendingAssignment) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
+                                    @csrf @method('PATCH')
                                     <input type="hidden" name="status" value="accepted">
-                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition text-sm font-medium">
-                                        ✅ تایید ارجاع
-                                    </button>
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition text-sm font-medium">✅ تایید ارجاع</button>
                                 </form>
                                 <form action="{{ route('assignments.update-status', $pendingAssignment) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
+                                    @csrf @method('PATCH')
                                     <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition text-sm font-medium">
-                                        ❌ رد ارجاع
-                                    </button>
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition text-sm font-medium">❌ رد ارجاع</button>
                                 </form>
                             </div>
                         </div>
@@ -126,22 +122,22 @@
                     $existingAssignment = $project->assignments()->where('assigned_to', auth()->id())->first();
                 @endphp
                 @if($existingAssignment && $existingAssignment->status === 'accepted')
-                    <div class="bg-green-50 border border-green-400 rounded-2xl p-4 mb-4">
-                        <p class="text-green-800">✅ شما این لید را قبلاً تایید کرده‌اید و در حال پیگیری آن هستید.</p>
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-400 dark:border-green-800 rounded-2xl p-4 mb-4 transition-colors">
+                        <p class="text-green-800 dark:text-green-300">✅ شما این لید را قبلاً تایید کرده‌اید و در حال پیگیری آن هستید.</p>
                     </div>
                 @elseif($existingAssignment && $existingAssignment->status === 'rejected')
-                    <div class="bg-red-50 border border-red-400 rounded-2xl p-4 mb-4">
-                        <p class="text-red-800">❌ شما این لید را رد کرده‌اید.</p>
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-800 rounded-2xl p-4 mb-4 transition-colors">
+                        <p class="text-red-800 dark:text-red-300">❌ شما این لید را رد کرده‌اید.</p>
                     </div>
                 @endif
             @endif
         @endif
 
         <!-- کارت وضعیت پروژه -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6 border-r-4 border-blue-500">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 border-r-4 border-blue-500 transition-colors">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <h3 class="text-lg font-bold text-gray-800">📊 وضعیت پروژه:</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">📊 وضعیت پروژه:</h3>
                     <span class="px-4 py-2 text-sm font-bold rounded-full {{ getStatusColor($project->project_status ?? 'lead') }}">
                         {{ translateProjectStatus($project->project_status ?? 'lead') }}
                     </span>
@@ -167,18 +163,15 @@
                     
                     @if($canChangeStatus)
                     <form action="{{ route('projects.update-status', $project) }}" method="POST" class="flex items-center gap-2">
-                        @csrf
-                        @method('PATCH')
-                        <select name="status" class="border rounded-lg px-4 py-2 text-sm">
+                        @csrf @method('PATCH')
+                        <select name="status" class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500">
                             @foreach($allowedStatuses as $status)
                                 <option value="{{ $status }}" {{ ($project->project_status ?? 'lead') == $status ? 'selected' : '' }}>
                                     {{ translateProjectStatus($status) }}
                                 </option>
                             @endforeach
                         </select>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
-                            به‌روزرسانی
-                        </button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm transition">به‌روزرسانی</button>
                     </form>
                     @endif
                 @endif
@@ -186,49 +179,41 @@
         </div>
 
         <!-- کارت اطلاعات عمومی -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6 border-r-4 border-green-500">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
-                📋 اطلاعات پایه پروژه
-            </h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 border-r-4 border-green-500 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">📋 اطلاعات پایه پروژه</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">نام پروژه:</span>
-                    <span class="font-bold text-gray-900 text-lg">{{ $project->title }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">نام پروژه:</span>
+                    <span class="font-bold text-gray-900 dark:text-white text-lg">{{ $project->title }}</span>
                 </div>
                 
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">تاریخ بازدید:</span>
-                    <span class="text-base">
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">تاریخ بازدید:</span>
+                    <span class="text-base text-gray-900 dark:text-white">
                         @if($project->visit_date)
                             @php
                                 try {
                                     $date = $project->visit_date;
-                                    if (is_string($date)) {
-                                        $date = \Carbon\Carbon::parse($date);
-                                    }
+                                    if (is_string($date)) { $date = \Carbon\Carbon::parse($date); }
                                     echo \Morilog\Jalali\Jalalian::fromCarbon($date)->format('Y/m/d');
-                                } catch (\Exception $e) {
-                                    echo 'تاریخ نامعتبر';
-                                }
+                                } catch (\Exception $e) { echo 'تاریخ نامعتبر'; }
                             @endphp
-                        @else
-                            -
-                        @endif
+                        @else - @endif
                     </span>
                 </div>
 
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">منطقه:</span>
-                    <span class="text-base">{{ $project->region ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">منطقه:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->region ?? '-' }}</span>
                 </div>
                 
                 <div class="md:col-span-2 lg:col-span-3">
-                    <span class="text-gray-500 block mb-1 text-sm">آدرس دقیق:</span>
-                    <span class="bg-gray-50 p-2 rounded block text-base">{{ $project->address }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">آدرس دقیق:</span>
+                    <span class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded block text-base text-gray-900 dark:text-white border border-gray-100 dark:border-gray-600">{{ $project->address }}</span>
                 </div>
 
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">کاربری:</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">کاربری:</span>
                     <span class="text-base">
                         @if($project->building_type)
                             @php
@@ -236,37 +221,35 @@
                             @endphp
                             @if(is_array($types))
                                 @foreach($types as $type)
-                                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full ml-1">{{ $type }}</span>
+                                    <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full ml-1">{{ $type }}</span>
                                 @endforeach
                             @else
                                 {{ $types }}
                             @endif
-                        @else
-                            -
-                        @endif
+                        @else - @endif
                     </span>
                 </div>
                 
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">تعداد طبقات:</span>
-                    <span class="text-base">{{ $project->floors ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">تعداد طبقات:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->floors ?? '-' }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">تعداد بلوک‌ها:</span>
-                    <span class="text-base">{{ $project->blocks ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">تعداد بلوک‌ها:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->blocks ?? '-' }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">بازاریاب:</span>
-                    <span class="text-base">{{ $project->marketer_name ?? $project->user?->name ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">بازاریاب:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->marketer_name ?? $project->user?->name ?? '-' }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">سطح پروژه:</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">سطح پروژه:</span>
                     <span class="text-base">
                         @php
                             $levelClass = match($project->level) {
-                                'A' => 'bg-red-100 text-red-800',
-                                'B' => 'bg-yellow-100 text-yellow-800',
-                                default => 'bg-gray-100 text-gray-800'
+                                'A' => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+                                'B' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+                                default => 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
                             };
                         @endphp
                         <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full {{ $levelClass }}">
@@ -275,71 +258,78 @@
                     </span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">امتیاز کل:</span>
-                    <span class="text-base font-bold text-green-600">{{ $project->total_score ?? $project->score ?? 0 }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">امتیاز کل:</span>
+                    <span class="text-base font-bold text-green-600 dark:text-green-400">{{ $project->total_score ?? $project->score ?? 0 }}</span>
                 </div>
             </div>
         </div>
 
         <!-- کارت افراد کلیدی -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">👥 افراد کلیدی پروژه</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">👥 افراد کلیدی پروژه</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">سمت</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">نام</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">موبایل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">سمت</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">نام</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">موبایل</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        @php $hasPerson = false; @endphp
                         @if($project->has_project_manager)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">مدیر پروژه</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->project_manager ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->project_manager_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">مدیر پروژه</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->project_manager ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->project_manager_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
                         @if($project->has_site_manager)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">مدیر کارگاه</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->site_manager ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->site_manager_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">مدیر کارگاه</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->site_manager ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->site_manager_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
                         @if($project->has_facilities_supervisor)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">سرپرست تأسیسات</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->facilities_supervisor ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->facilities_supervisor_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">سرپرست تأسیسات</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->facilities_supervisor ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->facilities_supervisor_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
                         @if($project->has_purchasing_manager)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">مسئول خرید</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->purchasing_manager ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->purchasing_manager_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">مسئول خرید</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->purchasing_manager ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->purchasing_manager_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
                         @if($project->has_mechanical_consultant)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">مشاور مکانیک</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->mechanical_consultant ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->mechanical_consultant_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">مشاور مکانیک</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->mechanical_consultant ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->mechanical_consultant_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
                         @if($project->has_hvac_contractor)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-medium">پیمانکار تأسیسات</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->hvac_contractor ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $project->hvac_contractor_mobile ?? '-' }}</td>
-                        </tr>
+                            @php $hasPerson = true; @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">پیمانکار تأسیسات</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $project->hvac_contractor ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $project->hvac_contractor_mobile ?? '-' }}</td>
+                            </tr>
                         @endif
-                        @if(!$project->has_project_manager && !$project->has_site_manager && !$project->has_facilities_supervisor && !$project->has_purchasing_manager && !$project->has_mechanical_consultant && !$project->has_hvac_contractor)
-                        <tr>
-                            <td colspan="3" class="px-6 py-8 text-center text-gray-500">هیچ فرد کلیدی ثبت نشده است.</td>
-                        </tr>
+                        @if(!$hasPerson)
+                            <tr>
+                                <td colspan="3" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">هیچ فرد کلیدی ثبت نشده است.</td>
+                            </tr>
                         @endif
                     </tbody>
                 </table>
@@ -348,23 +338,23 @@
 
         <!-- کارت مخاطبین پروژه -->
         @if($project->contacts && $project->contacts->count() > 0)
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">👤 مخاطبین پروژه</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">👤 مخاطبین پروژه</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">نام</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">موبایل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">سمت</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">نام</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">موبایل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">سمت</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach($project->contacts as $contact)
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm">{{ $contact->name }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $contact->mobile ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $contact->position ?? '-' }}</td>
+                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ $contact->name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 dir-ltr">{{ $contact->mobile ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $contact->position ?? '-' }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -374,44 +364,40 @@
         @endif
 
         <!-- کارت اطلاعات فنی -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">⚙️ اطلاعات فنی</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">⚙️ اطلاعات فنی</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">چیلر دارد؟:</span>
-                    <span class="text-base">{{ $project->has_chiller == 'yes' ? '✅ بله' : ($project->has_chiller == 'no' ? '❌ خیر' : '-') }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">چیلر دارد؟:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->has_chiller == 'yes' ? '✅ بله' : ($project->has_chiller == 'no' ? '❌ خیر' : '-') }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">برند چیلر:</span>
-                    <span class="text-base">{{ $project->chiller_brand ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">برند چیلر:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->chiller_brand ?? '-' }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">برج خنک‌کن دارد؟:</span>
-                    <span class="text-base">{{ $project->has_cooling_tower == 'yes' ? '✅ بله' : ($project->has_cooling_tower == 'no' ? '❌ خیر' : '-') }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">برج خنک‌کن دارد؟:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->has_cooling_tower == 'yes' ? '✅ بله' : ($project->has_cooling_tower == 'no' ? '❌ خیر' : '-') }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">برند فعلی برج خنک‌کن:</span>
-                    <span class="text-base">{{ $project->current_cooling_brand ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">برند فعلی برج خنک‌کن:</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->current_cooling_brand ?? '-' }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">ظرفیت تقریبی (TR):</span>
-                    <span class="text-base">{{ $project->capacity_tr ?? '-' }}</span>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">ظرفیت تقریبی (TR):</span>
+                    <span class="text-base text-gray-900 dark:text-white">{{ $project->capacity_tr ?? '-' }}</span>
                 </div>
                 @if($project->chiller_photo)
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">عکس چیلر:</span>
-                    <a href="{{ asset('storage/' . $project->chiller_photo) }}" target="_blank" class="text-blue-600 hover:underline">
-                        📷 مشاهده عکس
-                    </a>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">عکس چیلر:</span>
+                    <a href="{{ asset('storage/' . $project->chiller_photo) }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> مشاهده عکس</a>
                 </div>
                 @endif
                 @if($project->cooling_tower_photo)
                 <div>
-                    <span class="text-gray-500 block mb-1 text-sm">عکس برج خنک‌کن:</span>
-                    <a href="{{ asset('storage/' . $project->cooling_tower_photo) }}" target="_blank" class="text-blue-600 hover:underline">
-                        📷 مشاهده عکس
-                    </a>
+                    <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">عکس برج خنک‌کن:</span>
+                    <a href="{{ asset('storage/' . $project->cooling_tower_photo) }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">📷 مشاهده عکس</a>
                 </div>
                 @endif
             </div>
@@ -419,102 +405,91 @@
 
         <!-- کارت وضعیت خرید و رقبا -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-                <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">🛒 وضعیت خرید</h3>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">🛒 وضعیت خرید</h3>
                 <div class="space-y-3">
                     <div>
-                        <span class="text-gray-500 block mb-1 text-sm">مرحله خرید:</span>
+                        <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">مرحله خرید:</span>
+                        <span class="text-base text-gray-900 dark:text-white">{{ translatePurchaseStage($project->purchase_stage ?? '') }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-500 block mb-1 text-sm">زمان احتمالی خرید:</span>
-                        <span class="text-base">
+                        <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">زمان احتمالی خرید:</span>
+                        <span class="text-base text-gray-900 dark:text-white">
                             @if($project->expected_purchase_date || $project->estimated_purchase_date)
                                 @php
                                     try {
                                         $date = $project->expected_purchase_date ?? $project->estimated_purchase_date;
-                                        if (is_string($date)) {
-                                            $date = \Carbon\Carbon::parse($date);
-                                        }
+                                        if (is_string($date)) { $date = \Carbon\Carbon::parse($date); }
                                         echo \Morilog\Jalali\Jalalian::fromCarbon($date)->format('Y/m/d');
-                                    } catch (\Exception $e) {
-                                        echo '-';
-                                    }
+                                    } catch (\Exception $e) { echo '-'; }
                                 @endphp
-                            @else
-                                -
-                            @endif
+                            @else - @endif
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-                <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">🏢 رقبا</h3>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">🏢 رقبا</h3>
                 <div class="space-y-3">
                     <div>
-                        <span class="text-gray-500 block mb-1 text-sm">برندهای رقبا:</span>
-                        <span class="text-base">{{ $project->competitors ?? '-' }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">برندهای رقبا:</span>
+                        <span class="text-base text-gray-900 dark:text-white">{{ $project->competitors ?? '-' }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-500 block mb-1 text-sm">فروشنده رقیب:</span>
-                        <span class="text-base">{{ $project->competitor_seller ?? '-' }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">فروشنده رقیب:</span>
+                        <span class="text-base text-gray-900 dark:text-white">{{ $project->competitor_seller ?? '-' }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-500 block mb-1 text-sm">قیمت تقریبی:</span>
-                        <span class="text-base">{{ $project->approx_price ? number_format($project->approx_price) . ' تومان' : '-' }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">قیمت تقریبی:</span>
+                        <span class="text-base text-gray-900 dark:text-white">{{ $project->approx_price ? number_format($project->approx_price) . ' تومان' : '-' }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- دکمه‌های عملیات -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">🔧 عملیات</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">🔧 عملیات</h3>
             <div class="flex flex-wrap gap-4">
                 @if(auth()->user()->role === 'admin' || auth()->user()->role === 'sales_manager')
-                    <a href="{{ route('assignments.create', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition">
-                        🔄 ارجاع به کارشناس
-                    </a>
+                    <a href="{{ route('assignments.create', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition shadow-md">🔄 ارجاع به کارشناس</a>
                 @endif
                 
                 @if(auth()->user()->role === 'sales_expert' || auth()->user()->role === 'admin' || auth()->user()->role === 'sales_manager')
-                    <a href="{{ route('call-logs.create', $project) }}" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg transition">
-                        📞 ثبت تماس جدید
-                    </a>
+                    <a href="{{ route('call-logs.create', $project) }}" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg transition shadow-md">📞 ثبت تماس جدید</a>
                 @endif
                 
-                <a href="{{ route('call-logs.index', ['project_id' => $project->id]) }}" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg transition">
-                    📋 مشاهده تماس‌ها
-                </a>
+                <a href="{{ route('call-logs.index', ['project_id' => $project->id]) }}" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg transition shadow-md">📋 مشاهده تماس‌ها</a>
             </div>
         </div>
 
-        <!-- کارت ارجاع‌های این پروژه (فقط برای مدیران) -->
+        <!-- کارت ارجاع‌های این پروژه -->
         @if((auth()->user()->role === 'admin' || auth()->user()->role === 'sales_manager') && $project->assignments && $project->assignments->count() > 0)
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">🔄 ارجاع‌های این پروژه</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">🔄 ارجاع‌های این پروژه</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">کارشناس</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">ارجاع دهنده</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">وضعیت</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">تاریخ</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">کارشناس</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ارجاع دهنده</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">وضعیت</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">تاریخ</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach($project->assignments as $assignment)
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm">{{ $assignment->assignedTo->name ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $assignment->assignedBy->name ?? '-' }}</td>
+                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ $assignment->assignedTo->name ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $assignment->assignedBy->name ?? '-' }}</td>
                             <td class="px-6 py-4 text-sm">
                                 @php
                                     $statusMap = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'accepted' => 'bg-blue-100 text-blue-800',
-                                        'rejected' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-green-100 text-green-800'
+                                        'pending' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+                                        'accepted' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+                                        'rejected' => 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+                                        'completed' => 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                     ];
                                     $statusLabels = [
                                         'pending' => 'در انتظار',
@@ -523,11 +498,11 @@
                                         'completed' => 'انجام شده'
                                     ];
                                 @endphp
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusMap[$assignment->status] ?? 'bg-gray-100' }}">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusMap[$assignment->status] ?? 'bg-gray-100 dark:bg-gray-700' }}">
                                     {{ $statusLabels[$assignment->status] ?? $assignment->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm">{{ \Morilog\Jalali\Jalalian::fromCarbon($assignment->created_at)->format('Y/m/d') }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ \Morilog\Jalali\Jalalian::fromCarbon($assignment->created_at)->format('Y/m/d') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -538,31 +513,29 @@
 
         <!-- کارت تماس‌های این پروژه -->
         @if($project->callLogs && $project->callLogs->count() > 0)
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">📞 آخرین تماس‌ها</h3>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">📞 آخرین تماس‌ها</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">کارشناس</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">موضوع</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">نتیجه</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">تاریخ تماس</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">تماس بعدی</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">کارشناس</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">موضوع</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">نتیجه</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">تاریخ تماس</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">تماس بعدی</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach($project->callLogs->take(10) as $log)
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm">{{ $log->user->name ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $log->subject }}</td>
-                            <td class="px-6 py-4 text-sm">{{ Str::limit($log->result, 30) }}</td>
-                            <td class="px-6 py-4 text-sm">
+                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ $log->user->name ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $log->subject }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ Str::limit($log->result, 30) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                                 @if($log->call_date)
                                     {{ \Morilog\Jalali\Jalalian::fromCarbon($log->call_date)->format('Y/m/d H:i') }}
-                                @else
-                                    -
-                                @endif
+                                @else - @endif
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 @if($log->next_call_date)
@@ -572,15 +545,13 @@
                                         $isTomorrow = $nextDate->isTomorrow();
                                         $isPast = $nextDate->isPast();
                                     @endphp
-                                    <span class="{{ $isPast ? 'text-red-600 font-bold' : ($isToday ? 'text-yellow-600 font-bold' : '') }}">
+                                    <span class="{{ $isPast ? 'text-red-600 dark:text-red-400 font-bold' : ($isToday ? 'text-yellow-600 dark:text-yellow-400 font-bold' : 'text-gray-700 dark:text-gray-300') }}">
                                         {{ \Morilog\Jalali\Jalalian::fromCarbon($nextDate)->format('Y/m/d') }}
-                                        @if($isToday) 🔔 امروز @endif
+                                        @if($isToday)  امروز @endif
                                         @if($isTomorrow) ⏰ فردا @endif
                                         @if($isPast) ⚠️ گذشته @endif
                                     </span>
-                                @else
-                                    -
-                                @endif
+                                @else - @endif
                             </td>
                         </tr>
                         @endforeach
@@ -588,7 +559,7 @@
                 </table>
                 @if($project->callLogs->count() > 10)
                 <div class="mt-3 text-center">
-                    <a href="{{ route('call-logs.index', ['project_id' => $project->id]) }}" class="text-blue-600 hover:underline">
+                    <a href="{{ route('call-logs.index', ['project_id' => $project->id]) }}" class="text-blue-600 dark:text-blue-400 hover:underline">
                         مشاهده همه تماس‌ها ({{ $project->callLogs->count() }})
                     </a>
                 </div>
@@ -598,9 +569,9 @@
         @endif
 
         <!-- کارت یادداشت‌ها -->
-        <div class="bg-white overflow-hidden shadow-lg rounded-3xl p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">📝 یادداشت‌ها</h3>
-            <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ $project->notes ?? 'یادداشتی ثبت نشده است.' }}</p>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-3xl p-6 transition-colors">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">📝 یادداشت‌ها</h3>
+            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ $project->notes ?? 'یادداشتی ثبت نشده است.' }}</p>
         </div>
     </div>
 </div>

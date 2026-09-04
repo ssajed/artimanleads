@@ -71,6 +71,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/call-logs', [CallLogController::class, 'store'])->name('call-logs.store');
     Route::get('/call-logs/{callLog}', [CallLogController::class, 'show'])->name('call-logs.show');
     
+    // ✅ اضافه کردن روت‌های ویرایش تماس برای رفع خطا
+    Route::get('/call-logs/{callLog}/edit', [CallLogController::class, 'edit'])->name('call-logs.edit');
+    Route::put('/call-logs/{callLog}', [CallLogController::class, 'update'])->name('call-logs.update');
+    
     // ===== مدیریت نوتیفیکیشن‌ها =====
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');

@@ -14,6 +14,7 @@ class ProjectController extends Controller
         $user = auth()->user();
         $query = Project::with(['user', 'latestAssignment.assignedTo']);
 
+        // فیلتر بر اساس نقش کاربر
         if ($user->role === 'marketer') {
             $query->where('marketer_id', $user->id);
         } elseif ($user->role === 'sales_expert') {
@@ -23,19 +24,14 @@ class ProjectController extends Controller
             });
         }
 
-        if ($request->has('level') && $request->level != '') {
-            $levelMap = [
-                'A' => 'A_hot',
-                'B' => 'B_followup',
-                'C' => 'C_archive'
-            ];
+        // ✅ اصلاح فیلتر سطح لید (حذف levelMap بلااستفاده و اعتبارسنجی دقیق)
+        if ($request->has('level') && in_array($request->level, ['A', 'B', 'C'])) {
             $query->where('level', $request->level);
         }
 
         if ($request->has('user_id') && $request->user_id != '') {
             $query->where('marketer_id', $request->user_id);
         }
-
 
         if ($request->has('assignment_status') && $request->assignment_status != '') {
             $query->whereHas('latestAssignment', function($q) use ($request) {

@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS via CDN -->
+    <!-- Tailwind CSS via CDN with Dark Mode Config -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -47,7 +47,7 @@
     <style>
         * { font-family: 'Vazirmatn', sans-serif !important; }
         
-        /* استایل‌های پایه با پشتیبانی دارک مود */
+        /* استایل‌های پایه با پشتیبانی کامل دارک مود */
         body { background-color: #f3f4f6; transition: background-color 0.3s ease; }
         .dark body { background-color: #111827; color: #f3f4f6; }
 
