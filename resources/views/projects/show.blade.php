@@ -410,7 +410,9 @@
                 <div class="space-y-3">
                     <div>
                         <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">مرحله خرید:</span>
-                        <span class="text-base text-gray-900 dark:text-white">{{ translatePurchaseStage($project->purchase_stage ?? '') }}</span>
+                        <span class="text-base text-gray-900 dark:text-white">
+                            {{ translatePurchaseStage($project->purchase_status ?? '') }}
+                        </span>
                     </div>
                     <div>
                         <span class="text-gray-500 dark:text-gray-400 block mb-1 text-sm">زمان احتمالی خرید:</span>
@@ -549,7 +551,7 @@
                                         {{ \Morilog\Jalali\Jalalian::fromCarbon($nextDate)->format('Y/m/d') }}
                                         @if($isToday)  امروز @endif
                                         @if($isTomorrow) ⏰ فردا @endif
-                                        @if($isPast) ⚠️ گذشته @endif
+                                        @if($isPast) ️ گذشته @endif
                                     </span>
                                 @else - @endif
                             </td>
