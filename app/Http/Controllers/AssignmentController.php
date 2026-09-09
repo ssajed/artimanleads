@@ -13,7 +13,7 @@ class AssignmentController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'admin' || $user->role === 'sales_manager') {
             $assignments = Assignment::with(['project', 'assignedBy', 'assignedTo'])
                                      ->latest()
@@ -70,7 +70,6 @@ class AssignmentController extends Controller
         $project = Project::find($request->project_id);
         $project->update(['project_status' => 'assigned']);
 
-        // نوتیف برای کارشناس
         Notification::create([
             'user_id' => $request->assigned_to,
             'project_id' => $request->project_id,
@@ -93,23 +92,31 @@ class AssignmentController extends Controller
 
         $user = auth()->user();
 
-        // ===== شرط دسترسی: فقط خود کارشناس یا مدیران =====
         if ($assignment->assigned_to != $user->id && !in_array($user->role, ['admin', 'sales_manager'])) {
             abort(403, 'شما دسترسی لازم را ندارید.');
         }
 
-        // به‌روزرسانی وضعیت ارجاع
         $assignment->update(['status' => $request->status]);
-
-        // به‌روزرسانی وضعیت پروژه
         $project = $assignment->project;
-        
+
+        // ✅ اصلاح: بررسی وجود سایر ارجاع‌های فعال برای جلوگیری از تداخل وضعیت پروژه
+        $hasOtherActiveAssignments = Assignment::where('project_id', $project->id)
+            ->where('id', '!=', $assignment->id)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->exists();
+
         if ($request->status === 'accepted') {
             $project->update(['project_status' => 'negotiation']);
         } elseif ($request->status === 'rejected') {
-            $project->update(['project_status' => 'lead']);
+            // فقط اگر هیچ ارجاع فعال دیگری وجود نداشته باشد، پروژه به lead برمی‌گردد
+            if (!$hasOtherActiveAssignments) {
+                $project->update(['project_status' => 'lead']);
+            }
         } elseif ($request->status === 'completed') {
-            $project->update(['project_status' => 'archived']);
+            // فقط اگر هیچ ارجاع فعال دیگری وجود نداشته باشد، پروژه بایگانی می‌شود
+            if (!$hasOtherActiveAssignments) {
+                $project->update(['project_status' => 'archived']);
+            }
         }
 
         return redirect()->back()->with('success', 'وضعیت ارجاع با موفقیت به‌روزرسانی شد.');
