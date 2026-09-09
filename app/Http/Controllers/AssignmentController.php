@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Project;
 use App\Models\Assignment;
 use App\Models\User;
@@ -10,9 +11,18 @@ use App\Models\Notification;
 
 class AssignmentController extends Controller
 {
+    /**
+     * وضعیت‌های نهایی پروژه که توسط Assignment نباید تغییر کنند.
+     */
+    private const FINAL_STATUSES = ['sold', 'archived', 'lost'];
+
     public function index()
     {
         $user = auth()->user();
+
+        if ($user->role === 'marketer') {
+            abort(403, 'بازاریابان مجاز به مشاهده ارجاعات نیستند.');
+        }
 
         if ($user->role === 'admin' || $user->role === 'sales_manager') {
             $assignments = Assignment::with(['project', 'assignedBy', 'assignedTo'])
@@ -42,12 +52,24 @@ class AssignmentController extends Controller
     {
         $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'assigned_to' => 'required|exists:users,id',
+            'assigned_to' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'sales_expert'),
+            ],
             'notes' => 'nullable|string',
+        ], [
+            'assigned_to.exists' => 'کاربر انتخاب‌شده باید نقش کارشناس فروش داشته باشد.',
         ]);
 
         if (!in_array(auth()->user()->role, ['admin', 'sales_manager'])) {
             abort(403, 'شما دسترسی لازم را ندارید.');
+        }
+
+        $project = Project::find($request->project_id);
+
+        // ✅ اصلاح: اگر پروژه در وضعیت نهایی است، از ایجاد Assignment جلوگیری کن
+        if (in_array($project->project_status, self::FINAL_STATUSES)) {
+            return redirect()->back()->with('error', 'این پروژه در وضعیت نهایی قرار دارد و قابل ارجاع نیست.');
         }
 
         $existing = Assignment::where('project_id', $request->project_id)
@@ -67,8 +89,10 @@ class AssignmentController extends Controller
             'status' => 'pending',
         ]);
 
-        $project = Project::find($request->project_id);
-        $project->update(['project_status' => 'assigned']);
+        // ✅ اصلاح: فقط در صورتی وضعیت پروژه را تغییر بده که در وضعیت نهایی نباشد
+        if (!in_array($project->project_status, self::FINAL_STATUSES)) {
+            $project->update(['project_status' => 'assigned']);
+        }
 
         Notification::create([
             'user_id' => $request->assigned_to,
@@ -99,22 +123,27 @@ class AssignmentController extends Controller
         $assignment->update(['status' => $request->status]);
         $project = $assignment->project;
 
-        // ✅ اصلاح: بررسی وجود سایر ارجاع‌های فعال برای جلوگیری از تداخل وضعیت پروژه
+        // ✅ اصلاح: پروژه‌های نهایی توسط Assignment تغییر وضعیت نمی‌دهند
+        $isFinalStatus = in_array($project->project_status, self::FINAL_STATUSES);
+
         $hasOtherActiveAssignments = Assignment::where('project_id', $project->id)
             ->where('id', '!=', $assignment->id)
             ->whereIn('status', ['pending', 'accepted'])
             ->exists();
 
         if ($request->status === 'accepted') {
-            $project->update(['project_status' => 'negotiation']);
+            // فقط اگر پروژه در وضعیت نهایی نیست، به negotiation برود
+            if (!$isFinalStatus) {
+                $project->update(['project_status' => 'negotiation']);
+            }
         } elseif ($request->status === 'rejected') {
-            // فقط اگر هیچ ارجاع فعال دیگری وجود نداشته باشد، پروژه به lead برمی‌گردد
-            if (!$hasOtherActiveAssignments) {
+            // فقط اگر پروژه در وضعیت نهایی نیست و ارجاع فعال دیگری نیست، به lead برگردد
+            if (!$isFinalStatus && !$hasOtherActiveAssignments) {
                 $project->update(['project_status' => 'lead']);
             }
         } elseif ($request->status === 'completed') {
-            // فقط اگر هیچ ارجاع فعال دیگری وجود نداشته باشد، پروژه بایگانی می‌شود
-            if (!$hasOtherActiveAssignments) {
+            // فقط اگر پروژه در وضعیت نهایی نیست و ارجاع فعال دیگری نیست، archived شود
+            if (!$isFinalStatus && !$hasOtherActiveAssignments) {
                 $project->update(['project_status' => 'archived']);
             }
         }
